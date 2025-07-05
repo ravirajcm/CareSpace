@@ -9,7 +9,8 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 
 db.init_app(app)
 
-from models import User, Reservation, Resource
+from models import User, Reservation
+import resource_data
 
 @app.before_request
 def before_request_func():
@@ -36,23 +37,24 @@ def start_booking():
     action = data['action']  # Lab work, Patient consultation, Research
     time_needed = data['time_needed']
     # TODO: Add user history/routine logic
-    # Find available resource
-    resource = Resource.match_resource(action, user_id)
+    # Find available resource using resource_data
+    resource = resource_data.find_resource_by_action(action)
     if not resource:
         return jsonify({'message': 'No available resource found'}), 404
-    # Check for conflicts
-    if Reservation.check_conflict(resource.id, time_needed):
+    # Check for conflicts (dummy for now)
+    if resource_data.check_conflict(resource['Space ID'], time_needed):
         return jsonify({'message': 'Conflict detected, cannot book'}), 409
     # Create reservation (pending confirmation)
+    # NOTE: resource_id is now resource['Space ID'], resource_name is resource['OfficeName']
     reservation = Reservation(
         user_id=user_id,
-        resource_id=resource.id,
+        resource_id=resource['Space ID'],
         time_slot=time_needed,
         status='pending'
     )
     db.session.add(reservation)
     db.session.commit()
-    return jsonify({'message': 'Reservation pending confirmation', 'reservation_id': reservation.id, 'resource': resource.name})
+    return jsonify({'message': 'Reservation pending confirmation', 'reservation_id': reservation.id, 'resource': resource['OfficeName']})
 
 @app.route('/confirm_booking', methods=['POST'])
 def confirm_booking():
