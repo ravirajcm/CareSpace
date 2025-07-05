@@ -6,7 +6,9 @@ This guide explains how to test the hospital reservation system, including setup
 
 **a. Clone or navigate to the project directory:**
 ```
-cd /home/bobbyc/Projects/CareSpace
+# Clone the repository
+git clone git@github.com:ravirajcm/CareSpace.git
+cd CareSpace
 ```
 
 **b. Create and activate a virtual environment:**
